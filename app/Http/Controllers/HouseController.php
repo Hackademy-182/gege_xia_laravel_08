@@ -12,7 +12,7 @@ class HouseController extends Controller
      */
     public function index()
     {
-        $houses = \App\Models\House::latest()->get();
+        $houses = House::latest()->get();
 
         return view('houses.index', compact('houses'));
     }
@@ -43,24 +43,40 @@ class HouseController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(string $id)
+    public function edit(Request $request, House $house)
     {
-        //
+        abort_unless($request->user()->id === $house->user_id, 403);
+
+        return view('houses.edit', compact('house'));
+    }
+
+    public function update(Request $request, House $house)
+    {
+        abort_unless($request->user()->id === $house->user_id, 403);
+
+        $data = $request->validate([
+            'title' => 'required|string|max:255',
+            'price' => 'required|numeric|min:0',
+            'floor' => 'nullable|integer|min:0',
+        ]);
+
+        $house->update($data);
+
+        return redirect()->route('houses.show', $house);
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
-    {
-        //
-    }
-
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(string $id)
+    public function destroy(House $house)
     {
-        //
+        abort_unless(auth()->id() === $house->user_id, 403);
+
+        $house->delete();
+
+        return redirect()->route('houses.index');
     }
 }

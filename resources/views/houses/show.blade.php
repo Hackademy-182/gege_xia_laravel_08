@@ -15,11 +15,12 @@
 
     @auth
         @if (auth()->id() === $house->user_id)
-            <a href="#" class="btn btn-warning">Modifica</a>
-            <form method="POST" action="#" class="d-inline">
+            <a class="btn btn-warning" href="{{ route('houses.edit', $house) }}">Modifica annuncio</a>
+
+            <form method="POST" action="{{ route('houses.destroy', $house) }}" class="d-inline">
                 @csrf
                 @method('DELETE')
-                <button class="btn btn-danger">Cancella</button>
+                <button class="btn btn-danger">Cancella annuncio</button>
             </form>
         @endif
     @endauth
