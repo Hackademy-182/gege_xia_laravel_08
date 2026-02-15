@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\House;
 use Illuminate\Http\Request;
 
 class HouseController extends Controller
@@ -16,9 +17,6 @@ class HouseController extends Controller
         return view('houses.index', compact('houses'));
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
     public function create()
     {
         return view('houses.create');
@@ -32,23 +30,14 @@ class HouseController extends Controller
             'floor' => 'nullable|integer|min:0',
         ]);
 
-        $data['user_id'] = auth()->id();
-
-        auth()->user()->houses()->create($data);
+        $request->user()->houses()->create($data);
 
         return redirect()->to('/houses');
     }
 
-    /**
-     * Store a newly created resource in storage.
-     *
-
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
+    public function show(House $house)
     {
-        //
+        return view('houses.show', compact('house'));
     }
 
     /**

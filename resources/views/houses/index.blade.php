@@ -31,6 +31,8 @@
                                 <div class="fw-bold">{{ $house->title }}</div>
                                 <div class="text-muted small">
                                     € {{ number_format($house->price, 2, ',', '.') }}
+                                    <a href="{{ route('houses.show', $house) }}" class="stretched-link"></a>
+
                                     @if (!is_null($house->floor))
                                         • Piano {{ $house->floor }}
                                     @endif
