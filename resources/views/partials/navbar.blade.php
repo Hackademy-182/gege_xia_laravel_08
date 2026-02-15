@@ -9,7 +9,10 @@
 
                 @auth
                     <li class="nav-item"><a class="nav-link" href="{{ url('/houses/create') }}">Inserisci</a></li>
-                    <li class="nav-item"><a class="nav-link" href="{{ url('/profile') }}">Profilo</a></li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ route('profile.show') }}">Profilo</a>
+                    </li>
+
                     <li class="nav-item"><span class="navbar-text">Welcome, {{ auth()->user()->name }}</span></li>
 
                     <li class="nav-item">
