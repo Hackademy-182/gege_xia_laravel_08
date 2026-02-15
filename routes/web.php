@@ -8,22 +8,56 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', function () {
     return view('welcome');
 });
+
 Route::get('/home', function () {
     return redirect('/houses');
 });
+
 Route::get('/houses', [HouseController::class, 'index'])->name('houses.index');
 
 Route::middleware('auth')->group(function () {
     Route::get('/houses/create', [HouseController::class, 'create'])->name('houses.create');
     Route::post('/houses', [HouseController::class, 'store'])->name('houses.store');
-    Route::delete('/houses/{house}', [HouseController::class, 'destroy'])->name('houses.destroy');
+
     Route::get('/houses/{house}/edit', [HouseController::class, 'edit'])->name('houses.edit');
     Route::put('/houses/{house}', [HouseController::class, 'update'])->name('houses.update');
+
+    Route::delete('/houses/{house}', [HouseController::class, 'destroy'])->name('houses.destroy');
+});
+
+Route::get('/houses/{house}', [HouseController::class, 'show'])->name('houses.show');
+
+Route::middleware('auth')->group(function () {
+
+    Route::get('/profile', function () {
+        $user = Auth::user();
+        abort_unless($user, 403);
+
+        $profile = $user->profile; // può essere null
+        $houses = $user->houses()->latest()->get();
+
+        return view('profile.show', compact('user', 'profile', 'houses'));
+    })->name('profile.show');
+
     Route::get('/profile/create', function () {
+        $user = Auth::user();
+        abort_unless($user, 403);
+
+        if ($user->profile) {
+            return redirect()->route('profile.show');
+        }
+
         return view('profile.create');
     })->name('profile.create');
 
     Route::post('/profile', function (Request $request) {
+        $user = $request->user();
+        abort_unless($user, 403);
+
+        if ($user->profile) {
+            return redirect()->route('profile.show');
+        }
+
         $data = $request->validate([
             'phone' => 'nullable|string|max:255',
             'email_alt' => 'nullable|email|max:255',
@@ -32,20 +66,35 @@ Route::middleware('auth')->group(function () {
             'bio' => 'nullable|string',
         ]);
 
-        $request->user()->profile()->create($data);
+        $user->profile()->create($data);
 
         return redirect()->route('profile.show');
     })->name('profile.store');
 
+    Route::get('/profile/edit', function () {
+        $user = Auth::user();
+        abort_unless($user, 403);
+        abort_unless($user->profile, 404);
+
+        return view('profile.edit', ['profile' => $user->profile]);
+    })->name('profile.edit');
+
+    Route::put('/profile', function (Request $request) {
+        $user = $request->user();
+        abort_unless($user, 403);
+        abort_unless($user->profile, 404);
+
+        $data = $request->validate([
+            'phone' => 'nullable|string|max:255',
+            'email_alt' => 'nullable|email|max:255',
+            'instagram' => 'nullable|string|max:255',
+            'facebook' => 'nullable|string|max:255',
+            'bio' => 'nullable|string',
+        ]);
+
+        $user->profile->update($data);
+
+        return redirect()->route('profile.show');
+    })->name('profile.update');
+
 });
-Route::get('/houses/{house}', [HouseController::class, 'show'])->name('houses.show');
-
-Route::middleware('auth')->get('/profile', function () {
-    $user = Auth::user();
-    abort_unless($user, 403);
-
-    $profile = $user->profile;
-    $houses = $user->houses()->latest()->get();
-
-    return view('profile.show', compact('user', 'profile', 'houses'));
-})->name('profile.show');
