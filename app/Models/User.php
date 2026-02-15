@@ -45,4 +45,9 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
+
+    public function houses()
+    {
+        return $this->hasMany(\App\Models\House::class);
+    }
 }
